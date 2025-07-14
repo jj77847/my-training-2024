@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Training 2025</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <h1>💪 My Training 2025</h1>
+
+  <label for="workoutSelect">Select Workout:</label>
+  <select id="workoutSelect">
+    <option value="park">🏞 Park Ladder</option>
+    <option value="home">🏠 Home Ladder</option>
+    <option value="rings">🌀 Rings Workout</option>
+  </select>
+
+  <label for="filterSelect">Show:</label>
+  <select id="filterSelect">
+    <option value="all">All</option>
+    <option value="weekly">This Week</option>
+    <option value="monthly">This Month</option>
+  </select>
+
+  <div id="exportSection">
+    <div class="workout-summary" id="summary"></div>
+
+    <div class="chart-container">
+      <canvas id="progressChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h3>Exercise Contribution</h3>
+      <canvas id="exercisePieChart"></canvas>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <h3>Log Today's Sets</h3>
+    <form id="logForm">
+      <div id="dynamicInputs"></div>
+      <button type="submit">Save</button>
+    </form>
+  </div>
+
+  <div class="actions">
+    <button id="pdfBtn">📄 Export Summary to PDF</button>
+    <button id="zipBtn">🗜️ Download ZIP</button>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

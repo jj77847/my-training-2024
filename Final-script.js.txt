@@ -1,0 +1,224 @@
+const workoutData = {
+  park: {
+    title: "🏞 Park Ladder Workout",
+    structure: "10–6–4–3–2 reps",
+    exercises: ["Pull-Ups", "Dips", "Knee Raises", "Assisted Squats", "Hanging SLR", "Dead Hang"],
+    weeklyLogs: {},
+  },
+  home: {
+    title: "🏠 Home Ladder Workout",
+    structure: "10–6–4–3–2 reps + Press‑Ups",
+    exercises: ["Pull-Ups", "Dips", "Knee Raises", "Assisted Squats", "Press-Ups", "Dead Hang"],
+    weeklyLogs: {},
+  },
+  rings: {
+    title: "🌀 Rings Workout",
+    structure: "Fixed Sets",
+    exercises: ["Ring Support Hold", "Ring Dips", "Supported Ring Squats", "Ring Press-Ups"],
+    weeklyLogs: {},
+  }
+};
+
+let currentWorkout = 'park';
+let chart, pieChart;
+
+const select = document.getElementById('workoutSelect');
+const filterSelect = document.getElementById('filterSelect');
+const summary = document.getElementById('summary');
+const inputsContainer = document.getElementById('dynamicInputs');
+const logForm = document.getElementById('logForm');
+
+init();
+
+function init() {
+  loadStorage();
+  populateDropdown();
+  renderWorkout(currentWorkout);
+  setupEvents();
+}
+
+function loadStorage() {
+  const saved = localStorage.getItem('workouts');
+  if (saved) {
+    const obj = JSON.parse(saved);
+    Object.keys(workoutData).forEach(w => {
+      if (obj[w]?.weeklyLogs) workoutData[w].weeklyLogs = obj[w].weeklyLogs;
+      if (obj[w]?.exercises) workoutData[w].exercises = obj[w].exercises;
+    });
+  }
+}
+
+function saveStorage() {
+  localStorage.setItem('workouts', JSON.stringify(workoutData));
+}
+
+function populateDropdown() {
+  select.value = currentWorkout;
+}
+
+function setupEvents() {
+  select.addEventListener('change', e => {
+    currentWorkout = e.target.value;
+    renderWorkout(currentWorkout);
+  });
+  filterSelect.addEventListener('change', () => renderWorkout(currentWorkout));
+  logForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const dateKey = new Date().toISOString().slice(0,10);
+    const formData = new FormData(logForm);
+    const entry = {};
+    workoutData[currentWorkout].exercises.forEach(ex => {
+      entry[ex] = Number(formData.get(safeKey(ex))) || 0;
+    });
+    workoutData[currentWorkout].weeklyLogs[dateKey] = entry;
+    saveStorage();
+    renderWorkout(currentWorkout);
+    alert('Saved ✔️');
+  });
+  document.getElementById('pdfBtn').addEventListener('click', exportPDF);
+  document.getElementById('zipBtn').addEventListener('click', exportZIP);
+}
+
+function safeKey(str) {
+  return str.replace(/\s+/g, '_');
+}
+
+function renderWorkout(type) {
+  const data = workoutData[type];
+  summary.innerHTML = `
+    <h2>${data.title}</h2>
+    <p><strong>Structure:</strong> ${data.structure}</p>
+    <h3>Exercises:</h3>
+    <ul id="exerciseList">${data.exercises.map(e => `<li class="exercise">${e} <button onclick="removeExercise('${type}','${e}')">🗑️</button></li>`).join('')}</ul>
+    <input type="text" id="addEx" placeholder="Add new exercise">
+    <button onclick="addExercise()">➕ Add Exercise</button>
+  `;
+  renderForm(data.exercises);
+  renderChart(type);
+}
+
+function renderForm(exercises) {
+  inputsContainer.innerHTML = exercises.map(ex => `
+    <label>${ex}: 
+      <input type="number" name="${safeKey(ex)}" min="0" placeholder="0">
+    </label>
+  `).join('');
+}
+
+function renderChart(type) {
+  const logs = workoutData[type].weeklyLogs;
+  const filter = filterSelect.value;
+  const today = new Date();
+  const filteredDates = Object.keys(logs).filter(dateStr => {
+    const logDate = new Date(dateStr);
+    if (filter === "weekly") return (today - logDate) / 86400000 <= 7;
+    if (filter === "monthly") return logDate.getMonth() === today.getMonth() && logDate.getFullYear() === today.getFullYear();
+    return true;
+  });
+
+  const sortedDates = filteredDates.sort();
+  const totals = sortedDates.map(date => Object.values(logs[date]).reduce((sum, reps) => sum + reps, 0));
+
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('progressChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        label: 'Total Reps / Tasks',
+        data: totals,
+        backgroundColor: '#2196F3'
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+
+  const exerciseSums = {};
+  filteredDates.forEach(date => {
+    const log = logs[date];
+    for (let [exercise, reps] of Object.entries(log)) {
+      exerciseSums[exercise] = (exerciseSums[exercise] || 0) + reps;
+    }
+  });
+
+  if (pieChart) pieChart.destroy();
+  pieChart = new Chart(document.getElementById('exercisePieChart').getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(exerciseSums),
+      datasets: [{
+        label: 'Exercise Contribution',
+        data: Object.values(exerciseSums),
+        backgroundColor: Object.keys(exerciseSums).map(() => `hsl(${Math.random() * 360}, 70%, 60%)`)
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right' } } }
+  });
+}
+
+window.addExercise = function() {
+  const val = document.getElementById('addEx').value.trim();
+  if (!val) return alert('Enter a name');
+  workoutData[currentWorkout].exercises.push(val);
+  saveStorage();
+  renderWorkout(currentWorkout);
+  document.getElementById('addEx').value = '';
+};
+
+window.removeExercise = function(type, name) {
+  const idx = workoutData[type].exercises.indexOf(name);
+  if (idx > -1) {
+    workoutData[type].exercises.splice(idx, 1);
+    saveStorage();
+    renderWorkout(type);
+  }
+};
+
+async function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const exportEl = document.getElementById('exportSection');
+  const canvas = await html2canvas(exportEl, { scale: 2 });
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const imgData = canvas.toDataURL('image/png');
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+  pdf.save(`MyTraining2025_${currentWorkout}_${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+async function exportZIP() {
+  const zip = new JSZip();
+  const { jsPDF } = window.jspdf;
+  const exportEl = document.getElementById('exportSection');
+  const canvas = await html2canvas(exportEl, { scale: 2 });
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const imgData = canvas.toDataURL('image/png');
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+  const pdfBlob = pdf.output('blob');
+  zip.file(`MyTraining2025_${currentWorkout}.pdf`, pdfBlob);
+
+  const jsonData = JSON.stringify(workoutData[currentWorkout].weeklyLogs, null, 2);
+  zip.file(`rawData_${currentWorkout}.json`, jsonData);
+
+  const csvRows = [["Date", ...workoutData[currentWorkout].exercises]];
+  for (const date in workoutData[currentWorkout].weeklyLogs) {
+    const row = [date];
+    workoutData[currentWorkout].exercises.forEach(ex => {
+      row.push(workoutData[currentWorkout].weeklyLogs[date][ex] || 0);
+    });
+    csvRows.push(row);
+  }
+  zip.file(`rawData_${currentWorkout}.csv`, csvRows.map(r => r.join(",")).join("\n"));
+
+  zip.generateAsync({ type: "blob" }).then(content => {
+    const zipName = `MyTraining2025_${currentWorkout}_${new Date().toISOString().slice(0,10)}.zip`;
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(content);
+    link.download = zipName;
+    link.click();
+  });
+}

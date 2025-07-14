@@ -1,0 +1,45 @@
+1️⃣ 🏞 Park Ladder Workout
+	•	Structure: 10–6–4–3–2 reps (25 total)
+	•	Exercises Tracked:
+	•	Pull-Ups
+	•	Dips
+	•	Knee Raises
+	•	Assisted Squats
+	•	Hanging Straight Leg Raises
+	•	Dead Hang (1 min start + 1 min end)
+	•	Auto-Summary Features:
+	•	Weekly rep totals per exercise
+	•	Charts for progress over time
+	•	Track number of days performed
+	•	Auto-flag missed sessions or inconsistencies
+
+⸻
+
+2️⃣ 🏠 Home Ladder Workout
+	•	Structure: 10–6–4–3–2 reps (25 total)
+	•	Exercises Tracked:
+	•	Pull-Ups
+	•	Dips
+	•	Knee Raises
+	•	Assisted Squats
+	•	Press-Ups (3 × 10 = 30)
+	•	Dead Hang (1 min start + 1 min end)
+	•	Auto-Summary Features:
+	•	Same as park
+	•	Separate graphs for press-ups
+	•	Weekly % comparison to park workout (for consistency)
+
+⸻
+
+3️⃣ 🌀 Rings Workout (Wed–Fri)
+	•	Structure: Fixed sets/reps
+	•	Exercises Tracked:
+	•	Ring Support Holds (3 × 30s)
+	•	Ring Dips (3 × 5)
+	•	Supported Ring Squats (3 × 10)
+	•	Ring Press-Ups (3 × 10)
+	•	Auto-Summary Features:
+	•	Support time total per week
+	•	Ring-specific progress chart (dips, squats, press-ups)
+
+Use data above to identify 3 workouts then then I’d like to have those as labels for drop-down menus for each of them and then to show the exercises and rep schemes and totals as one unit therefore I can track progress and ideally in a pie chart format see clear weekly improvements and then four by chance highlightingmax reps weekly totals for that month and favourite exercises I don’t know list any improvements

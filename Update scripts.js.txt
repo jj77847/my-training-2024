@@ -1,0 +1,41 @@
+const filterSelect = document.getElementById('filterSelect');
+filterSelect.addEventListener('change', () => renderWorkout(currentWorkout));
+
+function renderChart(type) {
+  const logs = workoutData[type].weeklyLogs;
+  const filter = filterSelect.value;
+  const today = new Date();
+  
+  const filteredDates = Object.keys(logs).filter(dateStr => {
+    const logDate = new Date(dateStr);
+    if (filter === "weekly") {
+      const diff = (today - logDate) / (1000 * 60 * 60 * 24);
+      return diff <= 7;
+    } else if (filter === "monthly") {
+      return logDate.getMonth() === today.getMonth() && logDate.getFullYear() === today.getFullYear();
+    }
+    return true;
+  });
+
+  const sortedDates = filteredDates.sort();
+  const totals = sortedDates.map(date => {
+    return Object.values(logs[date]).reduce((sum, reps) => sum + reps, 0);
+  });
+
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        label: 'Total Reps / Tasks',
+        data: totals,
+        backgroundColor: '#2196F3'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}

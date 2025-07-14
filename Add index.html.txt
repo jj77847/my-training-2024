@@ -1,0 +1,16 @@
+<head>
+  <title>My Training 2025</title>
+  ...
+</head>
+<body>
+  <h1>💪 My Training 2025</h1>
+
+  <label for="workoutSelect">Select Workout:</label>
+  <select id="workoutSelect">...</select>
+
+  <label for="filterSelect">Show:</label>
+  <select id="filterSelect">
+    <option value="all">All</option>
+    <option value="weekly">This Week</option>
+    <option value="monthly">This Month</option>
+  </select>

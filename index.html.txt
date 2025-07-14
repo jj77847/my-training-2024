@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workout Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { margin-bottom: 10px; }
+    select { padding: 10px; font-size: 16px; }
+    .workout-summary, .chart-container { margin-top: 20px; background: white; padding: 20px; border-radius: 8px; }
+    .exercise { margin: 10px 0; }
+    canvas { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+
+  <h1>🏋️ Workout Tracker</h1>
+  <label for="workoutSelect">Select Workout:</label>
+  <select id="workoutSelect">
+    <option value="park">🏞 Park Ladder</option>
+    <option value="home">🏠 Home Ladder</option>
+    <option value="rings">🌀 Rings Workout</option>
+  </select>
+
+  <div class="workout-summary" id="summary"></div>
+
+  <div class="chart-container">
+    <canvas id="progressChart"></canvas>
+  </div>
+
+  <script>
+    const workoutData = {
+      park: {
+        title: "🏞 Park Ladder Workout",
+        structure: "10–6–4–3–2 reps (25 total)",
+        exercises: ["Pull-Ups", "Dips", "Knee Raises", "Assisted Squats", "Hanging Straight Leg Raises", "Dead Hang (1 min start + 1 min end)"],
+        weeklyData: [50, 60, 55, 65],
+      },
+      home: {
+        title: "🏠 Home Ladder Workout",
+        structure: "10–6–4–3–2 reps (25 total) + Press-Ups (3 × 10)",
+        exercises: ["Pull-Ups", "Dips", "Knee Raises", "Assisted Squats", "Press-Ups", "Dead Hang (1 min start + 1 min end)"],
+        weeklyData: [40, 70, 65, 75],
+      },
+      rings: {
+        title: "🌀 Rings Workout",
+        structure: "Fixed Sets/Reps",
+        exercises: ["Ring Support Holds (3 × 30s)", "Ring Dips (3 × 5)", "Supported Ring Squats (3 × 10)", "Ring Press-Ups (3 × 10)"],
+        weeklyData: [30, 35, 40, 50],
+      }
+    };
+
+    const select = document.getElementById('workoutSelect');
+    const summary = document.getElementById('summary');
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    let chart;
+
+    function renderWorkout(type) {
+      const data = workoutData[type];
+      summary.innerHTML = `
+        <h2>${data.title}</h2>
+        <p><strong>Structure:</strong> ${data.structure}</p>
+        <h3>Exercises:</h3>
+        <ul>${data.exercises.map(e => `<li class="exercise">${e}</li>`).join('')}</ul>
+      `;
+
+      if (chart) chart.destroy(); // cleanup previous chart
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+          datasets: [{
+            label: 'Total Weekly Reps',
+            data: data.weeklyData,
+            backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0']
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    select.addEventListener('change', (e) => renderWorkout(e.target.value));
+    renderWorkout(select.value); // Initial load
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<div class="chart-container">
+  <canvas id="progressChart"></canvas>
+</div>
+
+<div class="chart-container">
+  <h3>Exercise Contribution</h3>
+  <canvas id="exercisePieChart"></canvas>
+</div>
